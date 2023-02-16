@@ -12,9 +12,9 @@ int main()
 	{
 		ebs::window_config
 		{
-			800,
-			600,
-			"ebs_vulkan"
+			.width = 800,
+			.height = 600,
+			.name = "ebs_vulkan"
 		}
 	};
 
