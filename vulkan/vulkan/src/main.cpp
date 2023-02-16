@@ -1,37 +1,35 @@
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+// Internal includes.
+#include "pch.h"
+#include "application/testbed_app.h"
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/vec4.hpp>
-#include <glm/mat4x4.hpp>
-
+// Standard includes.
 #include <iostream>
 
 int main()
 {
-	glfwInit();
-
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Vulkan Window", nullptr, nullptr);
-
-	uint32_t extensionCount = 0;
-	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-	
-	std::cout << extensionCount << " extensions supported\n";
-
-	glm::mat4 matrix;
-	glm::vec4 vec;
-	auto test = matrix * vec;
-
-	while (!glfwWindowShouldClose(window))
+	ebs::testbed_app app;
+	ebs::app_config config
 	{
-		glfwPollEvents();
+		ebs::window_config
+		{
+			800,
+			600,
+			"ebs_vulkan"
+		}
+	};
+
+	if (app.init(config) != 0)
+	{
+		std::cout << "Failed to initialise app.\n";
+		return -1;
 	}
 
-	glfwDestroyWindow(window);
+	while (!app.should_terminate_app())
+	{
+		app.main_loop();
+	}
 
-	glfwTerminate();
+	app.shutdown();
 
 	return 0;
 }
