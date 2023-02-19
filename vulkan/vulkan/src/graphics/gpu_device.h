@@ -22,9 +22,11 @@ namespace ebs
 		VkInstance m_instance;
 		VkDebugUtilsMessengerEXT m_debug_utils_messenger;
 		VkPhysicalDevice m_physical_device;
-		VkPhysicalDeviceProperties2 m_physical_device_properties;
+		VkPhysicalDeviceProperties m_physical_device_properties;
 		VkQueue m_queue;
-		u32 m_queue_family;
+		u32 m_queue_family_index;
+		VkDevice m_device;
+
 	}; // !class gpu_device
 
 } // !namespace ebs
