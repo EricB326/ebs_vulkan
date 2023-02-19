@@ -8,11 +8,6 @@
 namespace ebs
 {
 
-	struct app_config
-	{
-		window_config window_cfg;
-	}; // !struct app_config
-
 	class testbed_app
 	{
 	public:
@@ -23,8 +18,8 @@ namespace ebs
 		bool should_terminate_app();
 
 	private:
-		int init_window(const window_config& window_cfg);
-		int init_graphics();
+		int init_window(const window_config& win_cfg);
+		int init_graphics(const gpu_device_config& win_cfg);
 
 		window m_window;
 		gpu_device m_gpu_device;

@@ -5,19 +5,25 @@
 #include <vulkan/vulkan_core.h>
 #include <vulkan/vulkan_win32.h>
 
+struct GLFWwindow;
+
 namespace ebs
 {
+	struct gpu_device_config
+	{
+		GLFWwindow* window_handle; // #TODO - Make void* incase I ever switch from GLFW and don't want to keep returning here?
+		u32 width;
+		u32 height;
+	}; // !struct gpu_device_config
 
 	class gpu_device
 	{
 	public:
-		//gpu_device();
-	
-		int init();
+		int init(const gpu_device_config& cfg);
 		void shutdown();
 	
 	private:
-		int create_instance();
+		int create_instance(const gpu_device_config& cfg);
 
 		VkInstance m_instance;
 		VkDebugUtilsMessengerEXT m_debug_utils_messenger;
@@ -26,6 +32,8 @@ namespace ebs
 		VkQueue m_queue;
 		u32 m_queue_family_index;
 		VkDevice m_device;
+
+		VkSurfaceKHR m_surface;
 
 	}; // !class gpu_device
 

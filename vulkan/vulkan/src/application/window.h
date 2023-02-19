@@ -16,11 +16,12 @@ namespace ebs
 	class window
 	{
 	public:
-		int init(const window_config& window_cfg);
+		int init(const window_config& cfg);
 		void shutdown();
 		void run();
 
 		bool should_window_close();
+		GLFWwindow* get_window_handle() { return m_window_handle; }
 	private:
 
 		GLFWwindow* m_window_handle;

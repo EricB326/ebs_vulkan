@@ -2,6 +2,10 @@
 #include "pch.h"
 #include "gpu_device.h"
 
+// External includes.
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
 namespace ebs
 {
 
@@ -63,11 +67,11 @@ namespace ebs
 #endif // !VK_DEBUG_VALIDATION
 
 	// GPU Device ////////////////////////////////////////////////////
-	int gpu_device::init()
+	int gpu_device::init(const gpu_device_config& cfg)
 	{
 		std::cout << "Creating gpu device.\n";
 
-		if (create_instance() != 0)
+		if (create_instance(cfg) != 0)
 		{
 			return -1;
 		}
@@ -77,6 +81,8 @@ namespace ebs
 
 	void gpu_device::shutdown()
 	{
+		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
+
 		vkDestroyDevice(m_device, nullptr);
 
 #if defined(VK_DEBUG_VALIDATION)
@@ -89,7 +95,7 @@ namespace ebs
 		std::cout << "Shutdown gpu device.\n";
 	}
 
-	int gpu_device::create_instance()
+	int gpu_device::create_instance(const gpu_device_config& cfg)
 	{
 		VkResult result;
 
@@ -251,6 +257,12 @@ namespace ebs
 
 		vkGetDeviceQueue(m_device, family_index, 0, &m_queue);
 		m_queue_family_index = family_index;
+
+		if (glfwCreateWindowSurface(m_instance, cfg.window_handle, nullptr, &m_surface) != VK_SUCCESS)
+		{
+			std::cout << "Failed to create window surface.\n";
+			return -1;
+		}
 
 		return 0;
 	}

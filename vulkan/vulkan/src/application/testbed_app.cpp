@@ -3,6 +3,8 @@
 #include "testbed_app.h"
 
 static int g_frame_count = 0;
+static u32 g_app_width = 800;
+static u32 g_app_height = 600;
 
 namespace ebs
 {
@@ -13,17 +15,25 @@ namespace ebs
 		std::cout << "Creating testbed app.\n";
 		window_config win_cfg =
 		{
-			.width = 800,
-			.height = 600,
+			.width = g_app_width,
+			.height = g_app_height,
 			.name = "ebs_vulkan"
 		};
+
 
 		if (init_window(win_cfg) != 0)
 		{
 			return -1;
 		}
 
-		if (init_graphics() != 0)
+		gpu_device_config gpu_device_cfg =
+		{
+			.window_handle = m_window.get_window_handle(),
+			.width = g_app_width,
+			.height = g_app_height,
+		};
+
+		if (init_graphics(gpu_device_cfg) != 0)
 		{
 			return -1;
 		}
@@ -54,9 +64,9 @@ namespace ebs
 		return m_terminate_app;
 	}
 
-	int testbed_app::init_window(const window_config& window_cfg)
+	int testbed_app::init_window(const window_config& win_cfg)
 	{
-		if (m_window.init(window_cfg) != 0)
+		if (m_window.init(win_cfg) != 0)
 		{
 			return -1;
 		}
@@ -64,9 +74,9 @@ namespace ebs
 		return 0;
 	}
 
-	int testbed_app::init_graphics()
+	int testbed_app::init_graphics(const gpu_device_config& gpu_device_cfg)
 	{
-		if (m_gpu_device.init() != 0)
+		if (m_gpu_device.init(gpu_device_cfg) != 0)
 		{
 			return -1;
 		}
