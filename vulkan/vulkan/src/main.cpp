@@ -8,17 +8,8 @@
 int main()
 {
 	ebs::testbed_app app;
-	ebs::app_config config
-	{
-		ebs::window_config
-		{
-			.width = 800,
-			.height = 600,
-			.name = "ebs_vulkan"
-		}
-	};
 
-	if (app.init(config) != 0)
+	if (app.init() != 0)
 	{
 		std::cout << "Failed to initialise app.\n";
 		return -1;

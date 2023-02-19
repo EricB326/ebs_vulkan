@@ -3,6 +3,7 @@
 
 // Internal includes.
 #include "window.h"
+#include "graphics/gpu_device.h"
 
 namespace ebs
 {
@@ -14,7 +15,7 @@ namespace ebs
 	class testbed_app
 	{
 	public:
-		int init(const app_config& app_cfg);
+		int init();
 		void shutdown();
 		void main_loop();
 	
@@ -25,6 +26,7 @@ namespace ebs
 		int init_graphics();
 
 		window app_window;
+		gpu_device app_gpu_device;
 		bool terminate_app = false;
 	}; // class testbed_app
 } // namespace ebs

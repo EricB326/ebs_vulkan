@@ -6,28 +6,42 @@ static int g_frame_count = 0;
 
 namespace ebs
 {
-	int testbed_app::init(const app_config& app_cfg)
+	// Testbed App ////////////////////////////////////////////////////
+	int testbed_app::init()
 	{
-		if (init_window(app_cfg.window_cfg) != 0)
+		std::cout << "Creating testbed app.\n";
+		window_config win_cfg =
+		{
+			.width = 800,
+			.height = 600,
+			.name = "ebs_vulkan"
+		};
+
+		if (init_window(win_cfg) != 0)
 		{
 			return -1;
 		}
 
-		std::cout << "testbed app created successfully.\n";
+		if (init_graphics() != 0)
+		{
+			return -1;
+		}
+
 		return 0;
 	}
 
 	void testbed_app::shutdown()
 	{
+		app_gpu_device.shutdown();
 		app_window.shutdown();
-		std::cout << "testbed app shutdown successfully.\n";
+		std::cout << "Shutdown testbed app.\n";
 	}
 
 	void testbed_app::main_loop()
 	{
 		while (!app_window.should_window_close())
 		{
-			std::cout << "frame: " << ++g_frame_count << "\n";
+			//std::cout << "frame: " << ++g_frame_count << "\n";
 			app_window.run();
 		}
 
@@ -51,6 +65,11 @@ namespace ebs
 
 	int testbed_app::init_graphics()
 	{
+		if (app_gpu_device.init() != 0)
+		{
+			return -1;
+		}
+
 		return 0;
 	}
 } // namespace ebs
