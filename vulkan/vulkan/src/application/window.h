@@ -11,7 +11,7 @@ namespace ebs
 		u32 width;
 		u32 height;
 		const char* name;
-	}; // struct window_config
+	}; // !struct window_config
 
 	class window
 	{
@@ -25,8 +25,8 @@ namespace ebs
 
 		GLFWwindow* window_handle;
 
-	}; // class window
+	}; // !class window
 
-} // namespace ebs
+} // !namespace ebs
 
 #endif // !WINDOW_H

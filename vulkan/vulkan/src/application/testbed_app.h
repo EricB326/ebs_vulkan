@@ -11,7 +11,7 @@ namespace ebs
 	struct app_config
 	{
 		window_config window_cfg;
-	}; // struct app_config
+	}; // !struct app_config
 
 	class testbed_app
 	{
@@ -29,8 +29,8 @@ namespace ebs
 		window app_window;
 		gpu_device app_gpu_device;
 		bool terminate_app = false;
-	}; // class testbed_app
+	}; // !class testbed_app
 
-} // namespace ebs
+} // !namespace ebs
 
 #endif // !TESTBED_APP_H

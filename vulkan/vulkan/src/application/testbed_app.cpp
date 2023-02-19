@@ -74,4 +74,4 @@ namespace ebs
 		return 0;
 	}
 
-} // namespace ebs
+} // !namespace ebs

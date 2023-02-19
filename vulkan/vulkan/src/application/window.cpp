@@ -45,4 +45,4 @@ namespace ebs
 		return glfwWindowShouldClose(window_handle);
 	}
 
-} // namespace ebs
+} // !namespace ebs

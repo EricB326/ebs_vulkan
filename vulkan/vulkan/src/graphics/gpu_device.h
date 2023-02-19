@@ -20,9 +20,9 @@ namespace ebs
 		int create_instance();
 
 		VkInstance instance;
-	
-	}; // class gpu_device
+		VkDebugUtilsMessengerEXT debug_utils_messenger;
+	}; // !class gpu_device
 
-} // namespace ebs
+} // !namespace ebs
 
 #endif // !GPU_DEVICE_H
