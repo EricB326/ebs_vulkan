@@ -33,30 +33,30 @@ namespace ebs
 
 	void testbed_app::shutdown()
 	{
-		app_gpu_device.shutdown();
-		app_window.shutdown();
+		m_gpu_device.shutdown();
+		m_window.shutdown();
 		std::cout << "Shutdown testbed app.\n";
 	}
 
 	void testbed_app::main_loop()
 	{
-		while (!app_window.should_window_close())
+		while (!m_window.should_window_close())
 		{
 			//std::cout << "frame: " << ++g_frame_count << "\n";
-			app_window.run();
+			m_window.run();
 		}
 
-		terminate_app = true;
+		m_terminate_app = true;
 	}
 
 	bool testbed_app::should_terminate_app()
 	{
-		return terminate_app;
+		return m_terminate_app;
 	}
 
 	int testbed_app::init_window(const window_config& window_cfg)
 	{
-		if (app_window.init(window_cfg) != 0)
+		if (m_window.init(window_cfg) != 0)
 		{
 			return -1;
 		}
@@ -66,7 +66,7 @@ namespace ebs
 
 	int testbed_app::init_graphics()
 	{
-		if (app_gpu_device.init() != 0)
+		if (m_gpu_device.init() != 0)
 		{
 			return -1;
 		}

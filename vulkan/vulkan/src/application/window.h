@@ -23,7 +23,7 @@ namespace ebs
 		bool should_window_close();
 	private:
 
-		GLFWwindow* window_handle;
+		GLFWwindow* m_window_handle;
 
 	}; // !class window
 

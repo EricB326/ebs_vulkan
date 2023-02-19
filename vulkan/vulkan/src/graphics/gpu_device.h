@@ -19,8 +19,12 @@ namespace ebs
 	private:
 		int create_instance();
 
-		VkInstance instance;
-		VkDebugUtilsMessengerEXT debug_utils_messenger;
+		VkInstance m_instance;
+		VkDebugUtilsMessengerEXT m_debug_utils_messenger;
+		VkPhysicalDevice m_physical_device;
+		VkPhysicalDeviceProperties2 m_physical_device_properties;
+		VkQueue m_queue;
+		u32 m_queue_family;
 	}; // !class gpu_device
 
 } // !namespace ebs

@@ -76,10 +76,10 @@ namespace ebs
 	void gpu_device::shutdown()
 	{
 #if defined(VK_DEBUG_VALIDATION)
-		PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
-		vkDestroyDebugUtilsMessengerEXT(instance, debug_utils_messenger, nullptr);
+		PFN_vkDestroyDebugUtilsMessengerEXT vkDestroyDebugUtilsMessengerEXT = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_instance, "vkDestroyDebugUtilsMessengerEXT");
+		vkDestroyDebugUtilsMessengerEXT(m_instance, m_debug_utils_messenger, nullptr);
 #endif // !VK_DEBUG_VALIDATION
-		vkDestroyInstance(instance, nullptr);
+		vkDestroyInstance(m_instance, nullptr);
 		std::cout << "Shutdown gpu device.\n";
 	}
 
@@ -121,7 +121,7 @@ namespace ebs
 		create_info.pNext = &debug_utils_create_info;
 #endif // !VK_DEBUG_VALIDATION
 
-		result = vkCreateInstance(&create_info, nullptr, &instance);
+		result = vkCreateInstance(&create_info, nullptr, &m_instance);
 		if (result != VK_SUCCESS)
 		{
 			std::cout << "Failed to create Vulkan instance\n";
@@ -151,8 +151,8 @@ namespace ebs
 		else
 		{
 			VkDebugUtilsMessengerCreateInfoEXT debug_utils_create_info = create_debug_utils_messager_info();
-			PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
-			vkCreateDebugUtilsMessengerEXT(instance, &debug_utils_create_info, nullptr, &debug_utils_messenger);
+			PFN_vkCreateDebugUtilsMessengerEXT vkCreateDebugUtilsMessengerEXT = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_instance, "vkCreateDebugUtilsMessengerEXT");
+			vkCreateDebugUtilsMessengerEXT(m_instance, &debug_utils_create_info, nullptr, &m_debug_utils_messenger);
 		}
 
 		// #TODO - Should I bother checking the layers for the validation layer if I already verified the debug extension?
@@ -169,6 +169,41 @@ namespace ebs
 		//	}
 		//}
 #endif // !VK_DEBUG_VALIDATION
+
+		u32 device_count = 0;
+		vkEnumeratePhysicalDevices(m_instance, &device_count, nullptr);
+		std::vector<VkPhysicalDevice> devices(device_count);
+		vkEnumeratePhysicalDevices(m_instance, &device_count, devices.data());
+
+		// #TODO - Improve. For now, use the first discrete device
+		for (u32 i = 0; i < device_count; ++i)
+		{
+			VkPhysicalDeviceProperties2 properties;
+			vkGetPhysicalDeviceProperties2(devices[i], &properties);
+			if (properties.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+			{
+				m_physical_device = devices[i];
+				m_physical_device_properties = properties;
+				break;
+			}
+		}
+
+		u32 queue_family_count = 0;
+		vkGetPhysicalDeviceQueueFamilyProperties2(m_physical_device, &queue_family_count, nullptr);
+		std::vector<VkQueueFamilyProperties2> queue_familes(queue_family_count);
+		vkGetPhysicalDeviceQueueFamilyProperties2(m_physical_device, &queue_family_count, queue_familes.data());
+
+		u32 family_index = 0;
+		for (; family_index < queue_family_count; ++family_index)
+		{
+			if (queue_familes[family_index].queueFamilyProperties.queueCount > 0 && queue_familes[family_index].queueFamilyProperties.queueFlags & (VK_QUEUE_GRAPHICS_BIT))
+			{
+				break;
+			}
+		}
+
+
+
 
 		return 0;
 	}

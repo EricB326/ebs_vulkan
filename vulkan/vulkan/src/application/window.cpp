@@ -22,15 +22,15 @@ namespace ebs
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-		window_handle = glfwCreateWindow(window_cfg.width, window_cfg.height, window_cfg.name, nullptr, nullptr);
-		glfwSetWindowCloseCallback(window_handle, window_close_callback);
+		m_window_handle = glfwCreateWindow(window_cfg.width, window_cfg.height, window_cfg.name, nullptr, nullptr);
+		glfwSetWindowCloseCallback(m_window_handle, window_close_callback);
 
 		return 0;
 	}
 
 	void window::shutdown()
 	{
-		glfwDestroyWindow(window_handle);
+		glfwDestroyWindow(m_window_handle);
 		glfwTerminate();
 		std::cout << "Shutdown window.\n";
 	}
@@ -42,7 +42,7 @@ namespace ebs
 
 	bool window::should_window_close()
 	{
-		return glfwWindowShouldClose(window_handle);
+		return glfwWindowShouldClose(m_window_handle);
 	}
 
 } // !namespace ebs
