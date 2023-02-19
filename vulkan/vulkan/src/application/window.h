@@ -5,6 +5,7 @@ struct GLFWwindow;
 
 namespace ebs
 {
+
 	struct window_config
 	{
 		u32 width;
@@ -25,6 +26,7 @@ namespace ebs
 		GLFWwindow* window_handle;
 
 	}; // class window
+
 } // namespace ebs
 
 #endif // !WINDOW_H

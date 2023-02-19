@@ -6,6 +6,7 @@ static int g_frame_count = 0;
 
 namespace ebs
 {
+
 	// Testbed App ////////////////////////////////////////////////////
 	int testbed_app::init()
 	{
@@ -72,4 +73,5 @@ namespace ebs
 
 		return 0;
 	}
+
 } // namespace ebs

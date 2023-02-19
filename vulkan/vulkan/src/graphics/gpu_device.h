@@ -7,6 +7,7 @@
 
 namespace ebs
 {
+
 	class gpu_device
 	{
 	public:
@@ -21,6 +22,7 @@ namespace ebs
 		VkInstance instance;
 	
 	}; // class gpu_device
+
 } // namespace ebs
 
 #endif // !GPU_DEVICE_H

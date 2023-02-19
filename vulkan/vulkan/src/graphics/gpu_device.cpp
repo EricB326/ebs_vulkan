@@ -15,6 +15,7 @@ static const char* g_requested_layers[] =
 
 namespace ebs
 {
+
 	// GPU Device ////////////////////////////////////////////////////
 	int gpu_device::init()
 	{

@@ -8,6 +8,7 @@
 
 namespace ebs
 {
+
 	// Callbacks /////////////////////////////////////////////////
 	void window_close_callback(GLFWwindow* handle)
 	{
