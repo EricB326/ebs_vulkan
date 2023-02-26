@@ -4,9 +4,13 @@
 #include <iostream>
 #include <vector>
 
+typedef unsigned char u8;
 typedef unsigned int u32;
+typedef unsigned short u16;
+typedef unsigned long long u64;
 
-#define ebs_sizeofarray(array) sizeof(array)/sizeof(array[0])
+#define SIZEOFARRAY(array) sizeof(array)/sizeof(array[0])
+#define FRAME_LATENCY 3 // Triple buffer.
 
 typedef int BOOL;
 typedef char CHAR;

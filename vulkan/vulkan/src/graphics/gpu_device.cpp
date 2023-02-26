@@ -6,8 +6,17 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+// STD includes.
+#include <stdint.h>
+
 namespace ebs
 {
+	// #TODO - Move elsewhere.
+	template<class T>
+	constexpr const T& clamp(const T& v, const T& lo, const T& hi) 
+	{
+		return (v < lo) ? lo : (hi < v) ? hi : v;
+	}
 
 #ifndef NDEBUG
 #define	VK_DEBUG_VALIDATION
@@ -81,6 +90,8 @@ namespace ebs
 
 	void gpu_device::shutdown()
 	{
+		vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
+
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
 
 		vkDestroyDevice(m_device, nullptr);
@@ -99,6 +110,7 @@ namespace ebs
 	{
 		VkResult result;
 
+		// Instance creation //////////
 		VkApplicationInfo app_info
 		{
 			.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
@@ -117,13 +129,13 @@ namespace ebs
 			.flags = 0,
 			.pApplicationInfo = &app_info,
 #if defined(VK_DEBUG_VALIDATION) // #TODO - Should very well occur after I check for existence..
-			.enabledLayerCount = ebs_sizeofarray(g_requested_layers),
+			.enabledLayerCount = SIZEOFARRAY(g_requested_layers),
 			.ppEnabledLayerNames = g_requested_layers,
 #else
 			.enabledLayerCount = 0,
 			.ppEnabledLayerNames = nullptr,
 #endif // !VK_DEBUG_VALIDATION
-			.enabledExtensionCount = ebs_sizeofarray(g_requested_extensions), // Not entirely safe, assuming that the system this code is being executed on in debug mode will already have the debug utils ext available.
+			.enabledExtensionCount = SIZEOFARRAY(g_requested_extensions), // Not entirely safe, assuming that the system this code is being executed on in debug mode will already have the debug utils ext available.
 			.ppEnabledExtensionNames = g_requested_extensions,
 		};
 
@@ -140,6 +152,7 @@ namespace ebs
 			return -1;
 		}
 
+		// Extension query //////////
 		// #TODO - Verify existence of my "required" extensions? This app is designed to run purely on win32 as of writing this...
 #if defined(VK_DEBUG_VALIDATION)
 		u32 extension_count = 0;
@@ -182,6 +195,7 @@ namespace ebs
 		//}
 #endif // !VK_DEBUG_VALIDATION
 
+		// Physical device selection //////////
 		u32 device_count = 0;
 		vkEnumeratePhysicalDevices(m_instance, &device_count, nullptr);
 		std::vector<VkPhysicalDevice> devices(device_count);
@@ -200,6 +214,7 @@ namespace ebs
 			}
 		}
 
+		// Logical device creation //////////
 		u32 queue_family_count = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(m_physical_device, &queue_family_count, nullptr);
 		std::vector<VkQueueFamilyProperties> queue_familes(queue_family_count);
@@ -208,7 +223,10 @@ namespace ebs
 		u32 family_index = 0;
 		for (; family_index < queue_family_count; ++family_index)
 		{
-			if (queue_familes[family_index].queueCount > 0 && queue_familes[family_index].queueFlags & (VK_QUEUE_GRAPHICS_BIT))
+			// If the queue flags support either graphics or compute, it supports transfer. Find a queue that supports graphics and compute, since we know transfer is supported then we have our main queue.
+			// https://registry.khronos.org/vulkan/specs/1.3-extensions/man/html/VkQueueFlagBits.html#_description - See the note.
+			// #TODO - Expand this?
+			if (queue_familes[family_index].queueCount > 0 && (queue_familes[family_index].queueFlags & (VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT)) == (VK_QUEUE_GRAPHICS_BIT | VK_QUEUE_COMPUTE_BIT))
 			{
 				break;
 			}
@@ -232,6 +250,7 @@ namespace ebs
 		};
 		vkGetPhysicalDeviceFeatures2(m_physical_device, &device_features);
 
+		// Don't care to query support of the swapchain. If the device cannot support the extension than this isn't a device to run on... The apps whole purpose is to render to a surface. 
 		const char* device_extensions[] =
 		{
 			"VK_KHR_swapchain",
@@ -244,7 +263,7 @@ namespace ebs
 			.flags = 0,
 			.queueCreateInfoCount = 1,
 			.pQueueCreateInfos = &queue_create_info,
-			.enabledExtensionCount = ebs_sizeofarray(device_extensions),
+			.enabledExtensionCount = SIZEOFARRAY(device_extensions),
 			.ppEnabledExtensionNames = device_extensions,
 		};
 
@@ -258,9 +277,87 @@ namespace ebs
 		vkGetDeviceQueue(m_device, family_index, 0, &m_queue);
 		m_queue_family_index = family_index;
 
+		// Surface creation //////////
 		if (glfwCreateWindowSurface(m_instance, cfg.window_handle, nullptr, &m_surface) != VK_SUCCESS)
 		{
 			std::cout << "Failed to create window surface.\n";
+			return -1;
+		}
+
+		u32 format_count;
+		vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, m_surface, &format_count, nullptr);
+		std::vector<VkSurfaceFormatKHR> formats(format_count);
+		vkGetPhysicalDeviceSurfaceFormatsKHR(m_physical_device, m_surface, &format_count, formats.data());
+
+		const VkFormat desired_formats[] = { VK_FORMAT_R8G8B8A8_UNORM, VK_FORMAT_B8G8R8A8_UNORM, VK_FORMAT_R8G8B8_UNORM, VK_FORMAT_B8G8R8_UNORM };
+		const VkColorSpaceKHR desired_colour_space = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+
+		bool format_found = false;
+		for (int i = 0; i < formats.size(); ++i)
+		{
+			for (int j = 0; j < SIZEOFARRAY(desired_formats); ++j)
+			{
+				if (formats[i].format == desired_formats[j] && formats[i].colorSpace == desired_colour_space)
+				{
+					m_surface_format = formats[i];
+					format_found = true;
+					break;
+				}
+			}
+		}
+
+		// #TODO - Improve.
+		if (!format_found)
+		{
+			m_surface_format = formats[0];
+		}
+
+		// FIFO is guaranteed. Can make a better selection mode but I'm fine with the force vsync etc. 
+		// FIFO is also the preferred vsync method for no tearing and dropped frames. Though can be detrimental to latency.
+		// https://developer.nvidia.com/blog/advanced-api-performance-vulkan-clearing-and-presenting/
+		m_present_mode = VK_PRESENT_MODE_FIFO_KHR;
+
+		// Swapchain creation //////////
+		// #TODO - Move into own function for swapchain recreation.
+		VkSurfaceCapabilitiesKHR surface_capabilities;
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_physical_device, m_surface, &surface_capabilities);
+
+		VkExtent2D swapchain_extent = surface_capabilities.currentExtent;
+		if (swapchain_extent.width == UINT32_MAX)
+		{
+			swapchain_extent.width = clamp(swapchain_extent.width, surface_capabilities.minImageExtent.width, surface_capabilities.maxImageExtent.width);
+			swapchain_extent.height = clamp(swapchain_extent.height, surface_capabilities.minImageExtent.height, surface_capabilities.maxImageExtent.height);
+		}
+		std::cout << "Swapchain (" << swapchain_extent.width << ", " << swapchain_extent.height << ", " << surface_capabilities.minImageCount << ")\n";
+
+		m_swapchain_width = (u16)swapchain_extent.width;
+		m_swapchain_height = (u16)swapchain_extent.height;
+
+		VkSwapchainCreateInfoKHR swapchain_create_info =
+		{
+			.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+			.pNext = nullptr,
+			.flags = 0,
+			.surface = m_surface,
+			.minImageCount = FRAME_LATENCY,
+			.imageFormat = m_surface_format.format,
+			.imageColorSpace = m_surface_format.colorSpace,
+			.imageExtent = swapchain_extent,
+			.imageArrayLayers = 1,
+			.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+			.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
+			.queueFamilyIndexCount = 0,
+			.pQueueFamilyIndices = nullptr,
+			.preTransform = surface_capabilities.currentTransform,
+			.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,
+			.presentMode = m_present_mode,
+			.clipped = VK_TRUE,
+			.oldSwapchain = VK_NULL_HANDLE
+		};
+		result = vkCreateSwapchainKHR(m_device, &swapchain_create_info, nullptr, &m_swapchain);
+		if (result != VK_SUCCESS)
+		{
+			std::cout << "Failed to create Vulkan swapchain.\n";
 			return -1;
 		}
 

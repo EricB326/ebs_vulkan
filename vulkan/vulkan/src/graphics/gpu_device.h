@@ -34,7 +34,11 @@ namespace ebs
 		VkDevice m_device;
 
 		VkSurfaceKHR m_surface;
-
+		VkSurfaceFormatKHR m_surface_format;
+		VkPresentModeKHR m_present_mode;
+		VkSwapchainKHR m_swapchain;
+		u16 m_swapchain_width;
+		u16 m_swapchain_height;
 	}; // !class gpu_device
 
 } // !namespace ebs
