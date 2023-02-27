@@ -43,9 +43,9 @@ namespace ebs
 	{
 		switch (types)
 		{
-		case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
-			std::cout << "(" << callback_data->pMessageIdName << " | " << callback_data->messageIdNumber << " | GENERAL) " << callback_data->pMessage << "\n";
-			break;
+		//case VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT:
+		//	std::cout << "(" << callback_data->pMessageIdName << " | " << callback_data->messageIdNumber << " | GENERAL) " << callback_data->pMessage << "\n";
+		//	break;
 		case VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT:
 			std::cout << "(" << callback_data->pMessageIdName << " | " << callback_data->messageIdNumber << " | VALIDATION) " << callback_data->pMessage << "\n";
 			break;
@@ -67,8 +67,8 @@ namespace ebs
 			.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
 			.pNext = nullptr,
 			.flags = 0,
-			.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
-			.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+			.messageSeverity = /*VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | */VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+			.messageType = /*VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | */VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
 			.pfnUserCallback = debug_utils_callback,
 			.pUserData = nullptr
 		};
@@ -90,6 +90,11 @@ namespace ebs
 
 	void gpu_device::shutdown()
 	{
+		for (int i = 0; i < m_swapchain_image_count; ++i)
+		{
+			vkDestroyImageView(m_device, m_swapchain_image_views[i], nullptr);
+		}
+
 		vkDestroySwapchainKHR(m_device, m_swapchain, nullptr);
 
 		vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
@@ -304,6 +309,10 @@ namespace ebs
 					break;
 				}
 			}
+			if (format_found)
+			{
+				break;
+			}
 		}
 
 		// #TODO - Improve.
@@ -339,7 +348,7 @@ namespace ebs
 			.pNext = nullptr,
 			.flags = 0,
 			.surface = m_surface,
-			.minImageCount = FRAME_LATENCY,
+			.minImageCount = m_swapchain_image_count,
 			.imageFormat = m_surface_format.format,
 			.imageColorSpace = m_surface_format.colorSpace,
 			.imageExtent = swapchain_extent,
@@ -354,11 +363,45 @@ namespace ebs
 			.clipped = VK_TRUE,
 			.oldSwapchain = VK_NULL_HANDLE
 		};
+
 		result = vkCreateSwapchainKHR(m_device, &swapchain_create_info, nullptr, &m_swapchain);
 		if (result != VK_SUCCESS)
 		{
 			std::cout << "Failed to create Vulkan swapchain.\n";
 			return -1;
+		}
+
+		vkGetSwapchainImagesKHR(m_device, m_swapchain, &m_swapchain_image_count, nullptr);
+		vkGetSwapchainImagesKHR(m_device, m_swapchain, &m_swapchain_image_count, m_swapchain_images);
+
+		for (int i = 0; i < FRAME_LATENCY; ++i)
+		{
+			VkImageViewCreateInfo image_view_create_info
+			{
+				.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+				.pNext = nullptr,
+				.flags = 0,
+				.image = m_swapchain_images[i],
+				.viewType = VK_IMAGE_VIEW_TYPE_2D,
+				.format = m_surface_format.format,
+			};
+			// We don't have standard C++ chained designators support. :(
+			image_view_create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+			image_view_create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+			image_view_create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+			image_view_create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+			image_view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+			image_view_create_info.subresourceRange.baseMipLevel = 0;
+			image_view_create_info.subresourceRange.levelCount = 1;
+			image_view_create_info.subresourceRange.baseArrayLayer = 0;
+			image_view_create_info.subresourceRange.layerCount = 1;
+
+			result = vkCreateImageView(m_device, &image_view_create_info, nullptr, &m_swapchain_image_views[i]);
+			if (result != VK_SUCCESS)
+			{
+				std::cout << "Failed to create Vulkan swapchain image views.\n";
+				return -1;
+			}
 		}
 
 		return 0;

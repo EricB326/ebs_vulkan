@@ -39,6 +39,10 @@ namespace ebs
 		VkSwapchainKHR m_swapchain;
 		u16 m_swapchain_width;
 		u16 m_swapchain_height;
+		u32 m_swapchain_image_count = FRAME_LATENCY; // #TODO - Should this be changeable depending on present mode?
+		VkImage m_swapchain_images[FRAME_LATENCY];
+		VkImageView m_swapchain_image_views[FRAME_LATENCY];
+
 	}; // !class gpu_device
 
 } // !namespace ebs
