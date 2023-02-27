@@ -5,11 +5,17 @@
 
 # Extensions
 *.bak
+*.user
+
+# Directories
+.vs/
+x64/
+x86/
+JSON/
 
 # User-specific files
 #*.rsuser
 #*.suo
-*.user
 #*.userosscache
 #*.sln.docstates
 
@@ -42,16 +48,12 @@
 #*.svclog
 #*.scc
 
-# Visual Studio 2015/2017 cache/options directory
-.vs/
 
 # Directories
 #[Dd]ebug/
 #[Dd]ebugPublic/
 #[Rr]elease/
 #[Rr]eleases/
-x64/
-x86/
 #[Aa][Rr][Mm]/
 #[Aa][Rr][Mm]64/
 #bld/
@@ -59,7 +61,6 @@ x86/
 #[Oo]bj/
 #[Ll]og/
 #[Ll]ogs/
-JSON/
 
 # Visual C++ cache files
 #ipch/
@@ -81,9 +82,9 @@ JSON/
 # Visual Studio cache files
 # files ending in .cache can be ignored
 #*.[Cc]ache
-## but keep track of directories ending in .cache
+# but keep track of directories ending in .cache
 #!?*.[Cc]ache/
-#
-## Python Tools for Visual Studio (PTVS)
+
+# Python Tools for Visual Studio (PTVS)
 #__pycache__/
 #*.pyc
