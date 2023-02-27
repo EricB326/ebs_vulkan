@@ -90,7 +90,7 @@ namespace ebs
 
 	void gpu_device::shutdown()
 	{
-		for (int i = 0; i < m_swapchain_image_count; ++i)
+		for (u32 i = 0; i < m_swapchain_image_count; ++i)
 		{
 			vkDestroyImageView(m_device, m_swapchain_image_views[i], nullptr);
 		}
